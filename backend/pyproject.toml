@@ -9,3 +9,6 @@ dependencies = [
     "python-multipart>=0.0.9",
     "markdown>=3.5.0",
 ]
+
+[tool.setuptools]
+py-modules = ["main", "prompts"]
