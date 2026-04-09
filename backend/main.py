@@ -215,7 +215,7 @@ async def extract_from_pdf(file: fastapi.UploadFile = fastapi.File(...)):
         
         # Call Gemini to extract information
         response = client.models.generate_content(
-            model="gemini-2.5-flash-preview-05-20",
+            model="gemini-2.5-flash",
             contents=[
                 EXTRACT_DEEP_RESEARCH_PROMPT_PRO,
                 genai.types.Part.from_bytes(data=pdf_bytes, mime_type="application/pdf"),
