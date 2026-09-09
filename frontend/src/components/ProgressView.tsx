@@ -36,7 +36,7 @@ export default function ProgressView({ phase, job, providerLabel }: ProgressView
 
   const introCopy =
     phase === "extracting"
-      ? "Reading the PDF, then searching scholarly sources for relevant papers. The source search may take a few minutes."
+      ? "Reading the document, then searching scholarly sources for relevant papers. The source search may take a few minutes."
       : "Research in progress. This typically takes 5 to 20 minutes depending on the provider and prompt length. You can leave this tab open.";
 
   return (

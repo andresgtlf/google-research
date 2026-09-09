@@ -184,8 +184,7 @@ Unresolved and non-DOI sources may still need manual formatting.
 
 ## Next Ladder intake surveys
 
-Upload PDF or Word (`.docx`) files. Beside the upload area, choose **Detect
- automatically**, **GitLab concept note**, or **Next Ladder intake**. Auto detection
+Upload PDF or Word (`.docx`) files. Beside the upload area, choose **Detect automatically**, **GitLab concept note**, or **Next Ladder intake**. Auto detection
 uses document content; uncertain or conflicting classifications pause at prompt
 review even in Standard mode. To correct the format, start over and choose it
 explicitly. The detected/selected format appears in the review, progress, saved
