@@ -1,0 +1,79 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Git
+.git/
+.gitignore
+
+# IDE and editor
+.cursor/
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs and debug files
+*.log
+debug.log
+
+# Generated output (will be created fresh in container)
+exports/
+research_results/
+history/
+
+# Input files (not needed in container)
+notes/
+json/
+
+# Environment and secrets (NEVER include)
+.env
+.env.*
+*.key
+
+# macOS launcher and OS files (not needed in cloud)
+*.command
+.DS_Store
+
+# Standalone scripts not used by the app. Anchored with a leading slash so
+# these can never be read as matching backend/main.py, which the container
+# needs to start.
+/test_api.py
+/main.py
+/research.py
+/build_kb.py
+/knowledge_base.py
+/app.py
+/unified_workflow.py
+/prompts.py
+/export.py
+tests/
+
+# Sample/test data
+ConceptNote-FutureFit.json
+data/
+jobs/
+tmp/
+output/
+.mypy_cache/
+
+# Frontend build artifacts (built inside the container)
+frontend/node_modules/
+frontend/dist/
+frontend/tsconfig.tsbuildinfo
+
+# Documentation (optional, can include if you want)
+# README.md
+# SETUP.md
+
+# Claude Code skills and settings (not needed in the image)
+.claude/

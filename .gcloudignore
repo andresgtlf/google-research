@@ -1,0 +1,63 @@
+# Build context uploaded to Cloud Build.
+#
+# gcloud does NOT read .dockerignore — it reads this file. Without it, gcloud
+# uploads the whole directory (node_modules, .mypy_cache, .venv, sample data),
+# and because this repo lives on a Google Drive stream mount, cloud-only files
+# have to be downloaded before they can be uploaded, which stalls the submit
+# for many minutes.
+#
+# Keep this in sync with what the Dockerfile actually needs:
+#   Dockerfile, pyproject.toml, uv.lock, backend/, logo/, frontend/ (sources)
+
+.gcloudignore
+.git/
+.gitignore
+
+# Dependencies and caches (reinstalled inside the image)
+frontend/node_modules/
+frontend/dist/
+frontend/tsconfig.tsbuildinfo
+.venv/
+.mypy_cache/
+__pycache__/
+*.py[oc]
+*.egg-info/
+
+# Secrets — never upload
+.env
+.env.*
+*.key
+
+# Sample data, notes and generated artifacts
+data/
+notes/
+json/
+output/
+exports/
+research_results/
+history/
+jobs/
+tmp/
+ConceptNote-FutureFit.json
+
+# Tests and tooling not used at runtime
+tests/
+.claude/
+.cursor/
+.streamlit/
+
+# Legacy v2 scripts superseded by backend/
+/app.py
+/main.py
+/research.py
+/export.py
+/prompts.py
+/unified_workflow.py
+/knowledge_base.py
+/build_kb.py
+/test_api.py
+
+# OS and local launchers
+.DS_Store
+*.command
+*.log
