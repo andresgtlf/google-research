@@ -181,3 +181,28 @@ When a model omits its reference list, protocol 8.2 attempts bounded Crossref AP
 formatting for DOIs already in the report and adds reference navigation. It
 preserves the model's original text in JSON and labels the recovered metadata.
 Unresolved and non-DOI sources may still need manual formatting.
+
+## Next Ladder intake surveys
+
+Upload PDF or Word (`.docx`) files. Beside the upload area, choose **Detect automatically**, **GitLab concept note**, or **Next Ladder intake**. Auto detection
+uses document content; uncertain or conflicting classifications pause at prompt
+review even in Standard mode. To correct the format, start over and choose it
+explicitly. The detected/selected format appears in the review, progress, saved
+report and exported document.
+
+Next Ladder extraction preserves users versus beneficiaries, engagement and
+conversion, actual versus projected reach, channel-specific financial impact,
+counterfactuals, durability, user costs, historical and projected budgets, total
+raise and explicit NLV requests. The research protocol includes benefits access,
+cost savings and debt-related outcomes alongside earnings, with checks against
+double counting and unsupported lifetime extrapolation. It produces evidence
+and model-input implications, not a completed ROI calculation.
+
+Word content is parsed as bounded text, including tables and hyperlink targets;
+macros, embedded files and external links are never executed or fetched by the
+parser. Image-only Word content should be exported to PDF. Blank template examples
+are not investee facts. Format selection and protocol version are part of reuse
+keys, so changing format cannot reuse an extraction from another selection.
+
+API: `POST /api/extract` accepts multipart `file`, `refresh`, and
+`document_format` (`auto`, `concept_note`, `next_ladder_intake`; default `auto`).

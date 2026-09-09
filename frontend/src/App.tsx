@@ -67,7 +67,7 @@ export default function App() {
   const startDisabledReason = session.providersError
     ? "Research engines unavailable"
     : !session.file
-      ? "Upload a PDF to start"
+      ? "Upload a PDF or Word document to start"
       : provider && !provider.available
         ? `${provider.label} needs an API key`
         : null;
@@ -95,6 +95,8 @@ export default function App() {
               {session.phase === "configure" && (
                 <>
                 <ConfigureStep
+                  documentFormat={session.documentFormat}
+                  onDocumentFormat={session.setDocumentFormat}
                   file={session.file}
                   onFile={session.setFile}
                   mode={session.mode}

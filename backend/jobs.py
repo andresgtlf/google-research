@@ -33,8 +33,8 @@ from typing import Any, Optional
 from .export import export_research_report
 from .reference_recovery import recover_references
 from .citations import prepare_citations
-from .extraction import extract_from_pdf, EXTRACTION_MODEL
-from .prompts import EXTRACTION_PROMPT
+from .extraction import extract_from_docx, extract_from_pdf, EXTRACTION_MODEL
+from .prompts import EXTRACTION_PROMPT, extraction_prompt
 from .library import library, fingerprint, PROTOCOL_VERSION
 from .providers import get_provider
 from .evidence.status import openalex_status
@@ -372,14 +372,14 @@ class JobManager:
 
     # ── Extraction job ─────────────────────────────────────────────
 
-    def start_extract(self, pdf_bytes: bytes, filename: str, refresh: bool = False) -> Job:
+    def start_extract(self, pdf_bytes: bytes, filename: str, refresh: bool = False, document_format: str = "auto") -> Job:
         self.reap_expired()
         job = Job("extract")
         job.set_evidence_status({"state": "waiting" if seeding_enabled() else "disabled",
-                                 "message": "OpenAlex will search for papers after the concept note is read."
+                                 "message": "OpenAlex will search for papers after the document is read."
                                  if seeding_enabled() else "OpenAlex candidate search is disabled for this run."})
         self._register(job)
-        (job.dir / "input.pdf").write_bytes(pdf_bytes)
+        (job.dir / "input.document").write_bytes(pdf_bytes)
 
         def work():
             try:
@@ -387,8 +387,8 @@ class JobManager:
                 job.add_event(f"Reading {filename} and extracting structured fields")
                 source_hash = hashlib.sha256(pdf_bytes).hexdigest()
                 cache_key = fingerprint({"pdf": source_hash, "protocol": PROTOCOL_VERSION,
-                                         "model": EXTRACTION_MODEL, "prompt": EXTRACTION_PROMPT,
-                                         "seeding": seeding_enabled()})
+                                         "model": EXTRACTION_MODEL, "prompt": extraction_prompt(document_format), "document_format": document_format,
+                                         "file_type": Path(filename).suffix.lower(), "seeding": seeding_enabled()})
                 cached = None if refresh else library.cached_extraction(cache_key)
                 if cached:
                     cached["source_filename"] = filename
@@ -398,7 +398,24 @@ class JobManager:
                     job.add_event("Reused saved extraction and evidence snapshot; select fresh search to update")
                     job.set_status("completed")
                     return
-                extraction = extract_from_pdf(pdf_bytes)
+                if filename.lower().endswith(".docx"):
+                    extraction = extract_from_docx(pdf_bytes, document_format)
+                elif document_format == "auto":
+                    extraction = extract_from_pdf(pdf_bytes)
+                else:
+                    extraction = extract_from_pdf(pdf_bytes, document_format=document_format)
+                detected_format = extraction.source_format
+                requires_review = document_format == "auto" and (
+                    detected_format == "unknown" or extraction.format_confidence != "high")
+                if document_format != "auto":
+                    requires_review = detected_format not in ("unknown", document_format)
+                    extraction.source_format = document_format
+                    extraction.format_confidence = "low" if requires_review else "high"
+                    extraction.format_reason = f"Selected by user: {document_format}; model detected: {detected_format}. " + extraction.format_reason
+                job.add_event(f"Document format: {extraction.source_format.replace('_', ' ')}"
+                              + (" (selected by user)" if document_format != "auto" else " (auto-detected)"))
+                if requires_review:
+                    job.add_event("Document format needs review before research starts; check extracted fields or re-upload with an explicit format.")
                 job.add_event(
                     f"Extracted: {extraction.organization or 'unknown org'}"
                     + (f" ({extraction.country})" if extraction.country else "")
@@ -431,6 +448,9 @@ class JobManager:
                 job.add_event("Research protocol assembled from template")
                 result = {
                     "extraction": extraction.model_dump(),
+                    "document_format_selection": document_format,
+                    "detected_format": detected_format,
+                    "requires_format_review": requires_review,
                     "research_prompt": prompt,
                     "source_filename": filename,
                     "source_sha256": source_hash,
@@ -451,7 +471,7 @@ class JobManager:
                 _fail(job, f"Extraction failed: {exc}", exc)
             finally:
                 # The input PDF is only needed during extraction.
-                _unlink_quietly(job.dir / "input.pdf")
+                _unlink_quietly(job.dir / "input.document")
 
         threading.Thread(target=work, daemon=True).start()
         return job
@@ -493,6 +513,7 @@ class JobManager:
         job = Job("research")
         job.provider = provider_id
         job.model = resolved_model
+        job.set_result({"extraction": extraction})
         job.set_evidence_status(evidence_status or openalex_status(evidence_snapshot))
         self._register(job)
 

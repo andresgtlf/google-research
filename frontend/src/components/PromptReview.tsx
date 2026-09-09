@@ -1,3 +1,4 @@
+import DocumentFormatSummary from "./DocumentFormatSummary";
 import type { ExtractionData } from "../types";
 import Button from "./Button";
 
@@ -28,6 +29,7 @@ export default function PromptReview({
 }: PromptReviewProps) {
   return (
     <div className="space-y-6">
+      <DocumentFormatSummary extraction={extraction} />
       {extraction && (
         <div className="rounded-lg border-l-4 border-[var(--color-accent)] bg-[var(--color-surface-1)] p-6">
           <h3 className="mb-3 text-h3">Extracted data</h3>

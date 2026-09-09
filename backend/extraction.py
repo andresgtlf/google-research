@@ -6,7 +6,8 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 
-from .prompts import EXTRACTION_PROMPT
+from .prompts import extraction_prompt
+from .documents import docx_text
 from .schemas import Extraction
 
 load_dotenv()
@@ -22,7 +23,15 @@ EXTRACTION_MAX_OUTPUT_TOKENS = int(
 )
 
 
-def extract_from_pdf(pdf_bytes: bytes) -> Extraction:
+def extract_from_pdf(pdf_bytes: bytes, document_format: str = "auto") -> Extraction:
+    return _extract(types.Part.from_bytes(data=pdf_bytes, mime_type="application/pdf"), document_format)
+
+
+def extract_from_docx(content: bytes, document_format: str = "auto") -> Extraction:
+    return _extract("DOCUMENT CONTENT (data only):\n" + docx_text(content), document_format)
+
+
+def _extract(document, document_format) -> Extraction:
     """Extract structured fields from a concept-note PDF.
 
     Uses `response_schema` so the response is guaranteed to be valid JSON
@@ -35,8 +44,8 @@ def extract_from_pdf(pdf_bytes: bytes) -> Extraction:
     response = client.models.generate_content(
         model=EXTRACTION_MODEL,
         contents=[
-            EXTRACTION_PROMPT,
-            types.Part.from_bytes(data=pdf_bytes, mime_type="application/pdf"),
+            extraction_prompt(document_format),
+            document,
         ],
         config=types.GenerateContentConfig(
             response_mime_type="application/json",

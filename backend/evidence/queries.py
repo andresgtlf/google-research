@@ -378,5 +378,18 @@ def build_queries(
         ),
         _family_population(extraction.intervention_types, extraction.population),
     ]
+    if extraction.source_format == "next_ladder_intake":
+        # Put channel searches first so generic income families cannot crowd them out.
+        subject = " ".join([extraction.summary, extraction.mechanisms_to_affect_income,
+                            " ".join(extraction.intake.financial_impact_channels)]).lower()
+        channels = [("benefit", "benefits enrollment financial impact"),
+                    ("debt", "debt relief financial distress causal impact"),
+                    ("bankruptcy", "bankruptcy access financial outcomes"),
+                    ("legal", "legal assistance costs randomized"),
+                    ("cost", "cost savings household financial wellbeing")]
+        intake_queries = [EvidenceQuery(terms=terms, country=extraction.country,
+                          rationale="Next Ladder intake financial-impact channel")
+                          for keyword, terms in channels if keyword in subject]
+        families.insert(0, intake_queries)
     ordered = [query for family in families for query in family]
     return _dedupe(ordered)[:MAX_QUERIES]

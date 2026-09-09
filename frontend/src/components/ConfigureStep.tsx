@@ -1,9 +1,11 @@
-import type { ProviderInfo, ResearchMode } from "../types";
+import type { ProviderInfo, ResearchMode, DocumentFormat } from "../types";
 import Button from "./Button";
 import ProviderPicker from "./ProviderPicker";
 import UploadZone from "./UploadZone";
 
 interface ConfigureStepProps {
+  documentFormat: DocumentFormat;
+  onDocumentFormat: (value: DocumentFormat) => void;
   file: File | null;
   onFile: (f: File | null) => void;
   mode: ResearchMode;
@@ -35,6 +37,8 @@ const MODE_OPTIONS: readonly [ResearchMode, string, string][] = [
 export default function ConfigureStep({
   file,
   onFile,
+  documentFormat,
+  onDocumentFormat,
   mode,
   onMode,
   providerId,
@@ -53,10 +57,10 @@ export default function ConfigureStep({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-display">Evidence-based concept note analysis</h1>
+        <h1 className="text-display">Research for concept notes and intake surveys</h1>
         <p className="mt-1 text-body text-[var(--color-text-secondary)]">
-          Upload a concept note. The agent runs an evidence scan on income
-          effects and lists paywalled papers you can retrieve manually.
+          Upload a GitLab Foundation concept note or Next Ladder intake survey.
+          The agent researches the financial-impact pathways and links the evidence.
         </p>
       </div>
 
@@ -66,7 +70,18 @@ export default function ConfigureStep({
         </div>
       )}
 
-      <UploadZone file={file} onFile={onFile} />
+      <div className="grid gap-3 sm:grid-cols-[1fr_200px]">
+        <UploadZone file={file} onFile={onFile} />
+        <div>
+          <label htmlFor="document-format" className="mb-2 block text-label">Document format</label>
+          <select id="document-format" value={documentFormat} onChange={e => onDocumentFormat(e.target.value as DocumentFormat)} className="w-full rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-surface-1)] p-3 text-body">
+            <option value="auto">Detect automatically</option>
+            <option value="concept_note">GitLab concept note</option>
+            <option value="next_ladder_intake">Next Ladder intake</option>
+          </select>
+          <p className="mt-2 text-caption text-[var(--color-text-secondary)]">Detection uses document content. Uncertain matches pause for review before research.</p>
+        </div>
+      </div>
 
       {extractError && (
         <div className="rounded-r-lg border-l-4 border-[var(--color-danger)] bg-[var(--color-danger-bg)] p-4">

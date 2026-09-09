@@ -1,3 +1,4 @@
+import DocumentFormatSummary from "./DocumentFormatSummary";
 import { useEffect, useRef } from "react";
 import type { Job } from "../types";
 import EvidenceSourceStatus from "./EvidenceSourceStatus";
@@ -35,11 +36,12 @@ export default function ProgressView({ phase, job, providerLabel }: ProgressView
 
   const introCopy =
     phase === "extracting"
-      ? "Reading the PDF, then searching scholarly sources for relevant papers. The source search may take a few minutes."
+      ? "Reading the document, then searching scholarly sources for relevant papers. The source search may take a few minutes."
       : "Research in progress. This typically takes 5 to 20 minutes depending on the provider and prompt length. You can leave this tab open.";
 
   return (
     <div className="space-y-6">
+      <DocumentFormatSummary extraction={job?.result.extraction} />
       <EvidenceSourceStatus status={job?.evidence_status} />
       <div className="rounded-lg bg-[var(--color-surface-1)] border border-[var(--color-border-subtle)] p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">

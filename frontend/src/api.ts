@@ -31,10 +31,11 @@ export async function fetchProviders(): Promise<ProviderInfo[]> {
   return (await check(await fetch("/api/providers"))).json();
 }
 
-export async function startExtraction(file: File, refresh = false): Promise<string> {
+export async function startExtraction(file: File, refresh = false, documentFormat = "auto"): Promise<string> {
   const form = new FormData();
   form.append("file", file);
   form.append("refresh", String(refresh));
+  form.append("document_format", documentFormat);
   const res = await check(
     await fetch("/api/extract", { method: "POST", body: form })
   );

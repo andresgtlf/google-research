@@ -17,6 +17,7 @@ from pydantic import BaseModel
 
 load_dotenv()
 
+from .documents import FORMATS, validate_document
 from .library import library
 from .jobs import manager  # noqa: E402
 from .providers import get_provider, list_providers  # noqa: E402
@@ -63,9 +64,11 @@ def providers() -> list[dict[str, Any]]:
 
 
 @app.post("/api/extract")
-async def extract(request: Request, file: UploadFile = File(...), refresh: bool = Form(False)) -> dict[str, str]:
-    if file.content_type not in ("application/pdf", "application/octet-stream"):
-        raise HTTPException(400, "Please upload a PDF file")
+async def extract(request: Request, file: UploadFile = File(...), refresh: bool = Form(False), document_format: str = Form("auto")) -> dict[str, str]:
+    if document_format not in FORMATS:
+        raise HTTPException(400, "Unknown document format")
+    if file.content_type not in ("application/pdf", "application/octet-stream", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"):
+        raise HTTPException(400, "Please upload a PDF or Word (.docx) file")
 
     # Reject oversized uploads from the declared length before buffering the
     # whole body into memory.
@@ -76,9 +79,11 @@ async def extract(request: Request, file: UploadFile = File(...), refresh: bool 
     pdf_bytes = await file.read(MAX_UPLOAD_BYTES + 1)
     if len(pdf_bytes) > MAX_UPLOAD_BYTES:
         raise HTTPException(400, "File exceeds the 50 MB limit")
-    if not pdf_bytes.startswith(b"%PDF"):
-        raise HTTPException(400, "File does not look like a valid PDF")
-    job = manager.start_extract(pdf_bytes, file.filename or "upload.pdf", refresh=refresh)
+    try:
+        validate_document(pdf_bytes, file.filename or "upload.pdf")
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))
+    job = manager.start_extract(pdf_bytes, file.filename or "upload.pdf", refresh=refresh, document_format=document_format)
     return {"job_id": job.id}
 
 
