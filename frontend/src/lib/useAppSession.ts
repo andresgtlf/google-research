@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { fetchJob, fetchProviders, startExtraction, startResearch } from "../api";
-import type { AppPhase, Job, ProviderInfo, ResearchMode } from "../types";
+import type { AppPhase, Job, ProviderInfo, ResearchMode, DocumentFormat } from "../types";
 import { clearPersistedState, loadPersistedState, savePersistedState } from "./persist";
 import { useJobPoller } from "./useJobPoller";
 
@@ -43,6 +43,7 @@ export function useAppSession() {
 
   const [phase, setPhase] = useState<AppPhase>("configure");
   const [file, setFile] = useState<File | null>(null);
+  const [documentFormat, setDocumentFormat] = useState<DocumentFormat>("auto");
   const [freshSearch, setFreshSearch] = useState(false);
   const [mode, setMode] = useState<ResearchMode>("standard");
   const [providerId, setProviderId] = useState("gemini");
@@ -123,6 +124,7 @@ export function useAppSession() {
         setHydrated(true);
         return;
       }
+      setDocumentFormat(persisted.documentFormat ?? "auto");
       setMode(persisted.mode ?? "standard");
       setProviderId(persisted.providerId ?? "gemini");
       setTier(persisted.tier ?? (persisted.providerId === "gemini" || !persisted.providerId ? "max" : "fast"));
@@ -146,7 +148,7 @@ export function useAppSession() {
           if (job.status === "completed") {
             const prompt = job.result.research_prompt ?? "";
             setResearchPrompt(prompt);
-            if (persisted.mode === "customized") {
+            if (persisted.mode === "customized" || job.result.requires_format_review) {
               setPhase("review");
             } else {
               setPhase("extracting");
@@ -181,6 +183,7 @@ export function useAppSession() {
     if (!hydrated) return;
     savePersistedState({
       freshSearch,
+      documentFormat,
       phase,
       extractJobId: extractJob?.id ?? null,
       researchJobId: researchJob?.id ?? null,
@@ -188,7 +191,7 @@ export function useAppSession() {
       providerId,
       tier,
     });
-  }, [hydrated, phase, extractJob?.id, researchJob?.id, mode, providerId, tier, freshSearch]);
+  }, [hydrated, phase, extractJob?.id, researchJob?.id, mode, providerId, tier, freshSearch, documentFormat]);
 
   // ── Poll extraction job ───────────────────────────────────────────
   useJobPoller({
@@ -199,7 +202,7 @@ export function useAppSession() {
       if (job.status === "completed") {
         const prompt = job.result.research_prompt ?? "";
         setResearchPrompt(prompt);
-        if (mode === "customized") setPhase("review");
+        if (mode === "customized" || job.result.requires_format_review) setPhase("review");
         else beginResearchOnce(job.id, prompt);
       } else {
         setExtractError(describeJobFailure(job));
@@ -237,13 +240,13 @@ export function useAppSession() {
     setExtractError(null);
     setHydrationNotice(null);
     try {
-      const jobId = await startExtraction(file, freshSearch);
+      const jobId = await startExtraction(file, freshSearch, documentFormat);
       setExtractJob(placeholderJob(jobId, "extract", null));
       setPhase("extracting");
     } catch (e) {
       setExtractError(e instanceof Error ? e.message : "Could not start extraction");
     }
-  }, [file, freshSearch]);
+  }, [file, freshSearch, documentFormat]);
 
   const handleFullReset = useCallback(() => {
     clearPersistedState();
@@ -259,6 +262,8 @@ export function useAppSession() {
   }, []);
 
   return {
+    documentFormat,
+    setDocumentFormat,
     freshSearch,
     setFreshSearch,
     openSavedReport: (job: Job) => { setResearchJob(job); setPhase("complete"); },

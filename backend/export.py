@@ -61,6 +61,14 @@ PROVIDER_LABELS = {
 def format_extraction_summary(extraction: dict) -> str:
     """Format the extraction data into a readable summary section."""
     lines = ["## Project Overview\n"]
+    if extraction.get("source_format"):
+        lines.append("**Document format:** " + extraction["source_format"].replace("_", " ") + "\n")
+    if extraction.get("source_format") == "next_ladder_intake":
+        lines.append("### Intake claims and model inputs\n\nSource-reported; not independently verified.\n")
+        for key, value in extraction.get("intake", {}).items():
+            if value:
+                rendered = "; ".join(value) if isinstance(value, list) else str(value)
+                lines.append(f"**{key.replace('_', ' ').capitalize()}:** {rendered}\n")
 
     if extraction.get("organization"):
         lines.append(f"**Organization:** {extraction['organization']}\n")

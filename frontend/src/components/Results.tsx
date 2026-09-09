@@ -1,3 +1,4 @@
+import DocumentFormatSummary from "./DocumentFormatSummary";
 import { useMemo, useState } from "react";
 import { fileUrl } from "../api";
 import type { Job } from "../types";
@@ -118,6 +119,7 @@ export default function Results({ job }: ResultsProps) {
         </div>
       </div>
 
+      <DocumentFormatSummary extraction={job.result.extraction} />
       <EvidenceSourceStatus status={job.evidence_status} terminal />
 
       {parseWarnings.length > 0 && (

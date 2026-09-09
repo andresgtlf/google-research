@@ -1,3 +1,4 @@
+import DocumentFormatSummary from "./DocumentFormatSummary";
 import { useEffect, useRef } from "react";
 import type { Job } from "../types";
 import EvidenceSourceStatus from "./EvidenceSourceStatus";
@@ -40,6 +41,7 @@ export default function ProgressView({ phase, job, providerLabel }: ProgressView
 
   return (
     <div className="space-y-6">
+      <DocumentFormatSummary extraction={job?.result.extraction} />
       <EvidenceSourceStatus status={job?.evidence_status} />
       <div className="rounded-lg bg-[var(--color-surface-1)] border border-[var(--color-border-subtle)] p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">

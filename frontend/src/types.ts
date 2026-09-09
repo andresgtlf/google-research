@@ -1,3 +1,4 @@
+export type DocumentFormat = "auto" | "concept_note" | "next_ladder_intake";
 export interface ModelOption {
   id: string;
   label: string;
@@ -21,6 +22,10 @@ export interface JobEvent {
 }
 
 export interface ExtractionData {
+  source_format?: "concept_note" | "next_ladder_intake" | "unknown";
+  format_confidence?: "high" | "low";
+  format_reason?: string;
+  intake?: Record<string, string | string[]>;
   organization: string;
   project_title: string;
   summary: string;
@@ -92,6 +97,7 @@ export interface Job {
   remote_id?: string | null;
   result: {
     extraction?: ExtractionData;
+    requires_format_review?: boolean;
     research_prompt?: string;
     report_markdown?: string;
     run_fingerprint?: string;
@@ -115,6 +121,7 @@ export type ResearchMode = "standard" | "customized";
  * abandon a job that is still alive server-side. Kept intentionally small
  * and serializable. */
 export interface PersistedAppState {
+  documentFormat?: DocumentFormat;
   freshSearch?: boolean;
   phase: AppPhase;
   extractJobId: string | null;

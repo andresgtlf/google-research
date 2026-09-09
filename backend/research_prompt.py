@@ -106,6 +106,9 @@ def build_research_prompt(
     Retrieval accelerates this review; it is never a precondition for it.
     """
     e = extraction
+    if e.source_format == "next_ladder_intake":
+        from .intake_protocol import build_intake_prompt
+        return build_intake_prompt(e, retrieval)
     country = e.country or "the target country"
     question = e.primary_research_question or (
         f"What are the causal effects on income (wages/earnings, household "

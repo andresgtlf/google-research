@@ -4,7 +4,7 @@ Used as the `response_schema` for Gemini structured output, which guarantees
 valid JSON and removes the regex-based JSON recovery used in v2.
 """
 
-from typing import Optional
+from typing import Optional, Literal
 
 from pydantic import BaseModel, Field
 
@@ -40,7 +40,30 @@ class Funding(BaseModel):
     total_project_budget_usd: Optional[float] = None
 
 
+class IntakeImpact(BaseModel):
+    users_and_beneficiaries: str = ""
+    delivery_model: str = ""
+    target_low_income_share: str = ""
+    historical_reach: list[str] = []
+    projected_reach: list[str] = []
+    engagement_and_conversion: list[str] = []
+    financial_impact_channels: list[str] = []
+    counterfactual: str = ""
+    durability: list[str] = []
+    user_costs_and_fees: list[str] = []
+    prior_funding: list[str] = []
+    historical_budgets: list[str] = []
+    projected_budgets: list[str] = []
+    total_raise: str = ""
+    next_ladder_request: str = ""
+    assumptions_and_gaps: list[str] = []
+
+
 class Extraction(BaseModel):
+    source_format: Literal["concept_note", "next_ladder_intake", "unknown"] = "unknown"
+    format_confidence: Literal["high", "low"] = "low"
+    format_reason: str = ""
+    intake: IntakeImpact = IntakeImpact()
     organization: str = ""
     project_title: str = ""
     summary: str = ""

@@ -21,13 +21,13 @@ export default function UploadZone({
 
   function accept(candidate: File | undefined) {
     if (!candidate) return;
-    if (!candidate.name.toLowerCase().endsWith(".pdf")) {
-      setLocalError("This file isn't a PDF. Upload the concept note as a .pdf and try again.");
+    if (!(/\.(pdf|docx)$/i.test(candidate.name))) {
+      setLocalError("Upload a PDF or Word (.docx) document.");
       return;
     }
     if (candidate.size > MAX_BYTES) {
       setLocalError(
-        "This PDF is larger than 50 MB. Compress it or split it into sections, then upload again."
+        "This document is larger than 50 MB. Compress it or split it into sections, then upload again."
       );
       return;
     }
@@ -44,7 +44,7 @@ export default function UploadZone({
             {file.name}
           </div>
           <div className="text-mono-data text-[var(--color-text-secondary)]">
-            {formatSize(file.size)} &middot; PDF document
+            {formatSize(file.size)} &middot; {file.name.toLowerCase().endsWith(".docx") ? "Word document" : "PDF document"}
           </div>
         </div>
         <button
@@ -90,15 +90,15 @@ export default function UploadZone({
           />
         )}
         <div className="text-h3 text-[var(--color-text-primary)]">
-          Drop your concept note here
+          Drop your concept note or intake survey here
         </div>
         <div className="text-body text-[var(--color-text-secondary)]">
-          or click to browse. PDF, up to 50 MB.
+          or click to browse. PDF or Word (.docx), up to 50 MB.
         </div>
         <input
           ref={inputRef}
           type="file"
-          accept="application/pdf"
+          accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
           className="hidden"
           onChange={(e) => accept(e.target.files?.[0])}
         />
