@@ -173,3 +173,14 @@ def test_word_text_limit_is_enforced(monkeypatch):
     monkeypatch.setattr(documents, "MAX_XML_BYTES", 10)
     with pytest.raises(ValueError, match="20 MB"):
         documents.docx_text(word("text"))
+
+
+def test_intake_query_builder_includes_financial_channels():
+    from backend.evidence.queries import build_queries
+    e = Extraction(source_format="next_ladder_intake", country="United States",
+                   summary="Benefits navigation and debt relief")
+    queries = build_queries(e)
+    assert queries
+    assert any("benefits enrollment" in q.terms for q in queries)
+    assert any("debt relief" in q.terms for q in queries)
+    assert queries[0].label == "Next Ladder intake financial-impact channel"

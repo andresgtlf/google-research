@@ -387,8 +387,8 @@ def build_queries(
                     ("bankruptcy", "bankruptcy access financial outcomes"),
                     ("legal", "legal assistance costs randomized"),
                     ("cost", "cost savings household financial wellbeing")]
-        intake_queries = [EvidenceQuery(terms=terms, country=extraction.country,
-                          rationale="Next Ladder intake financial-impact channel")
+        intake_queries = [EvidenceQuery(terms=(terms + " " + extraction.country).strip(),
+                          label="Next Ladder intake financial-impact channel")
                           for keyword, terms in channels if keyword in subject]
         families.insert(0, intake_queries)
     ordered = [query for family in families for query in family]

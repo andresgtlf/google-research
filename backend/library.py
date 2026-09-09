@@ -15,7 +15,7 @@ import threading
 from pathlib import Path
 from typing import Any
 
-PROTOCOL_VERSION = "9.0"
+PROTOCOL_VERSION = "9.1"
 
 
 def fingerprint(value: Any) -> str:

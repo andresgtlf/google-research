@@ -8,7 +8,7 @@ def build_intake_prompt(extraction, retrieval=None):
     data = json.dumps(extraction.model_dump(), ensure_ascii=False, indent=2)
     candidates = render_candidate_block(retrieval) if retrieval is not None else ""
     return f"""You are conducting a reproducible literature review to inform a Next Ladder
-Ventures impact model (protocol 9.0). Research evidence, not an investment decision
+Ventures impact model (protocol 9.1). Research evidence, not an investment decision
 or a completed ROI spreadsheet. The outcome is incremental net financial benefit
 to low-income people and households: earnings, benefits actually accessed, costs
 avoided and debt-related cash-flow changes as applicable to THIS intake.
