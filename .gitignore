@@ -9,22 +9,40 @@ wheels/
 # Virtual environments
 .venv
 
-# Environment variables & secrets
+# Environment / secrets
 .env
-.env.*
-!.env.example
 
-# Data output folders
-exports/
-json/
-notes/
-research_results/
-
-# macOS
+# OS
 .DS_Store
 
-# Cursor IDE
-.cursor/
+# Temporary files
+tmp/
 
-# Type checker cache
+# Frontend
+node_modules/
+frontend/dist/
+*.tsbuildinfo
+
+# Job artifacts and local data
+jobs/
+data/
+output/
+exports/
+research_results/
+
+# Per-developer Claude Code settings (shared skills under .claude/skills are tracked)
+.claude/settings.local.json
+
+# Developer caches and sensitive working material
+.pytest_cache/
 .mypy_cache/
+.ruff_cache/
+.env.*
+!.env.example
+*.log
+notes/incident-*/
+notes/*report.html
+ConceptNote-*.json
+
+json/
+notes/*.pdf
