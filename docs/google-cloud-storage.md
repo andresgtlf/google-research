@@ -26,7 +26,7 @@ before confidential research is accessible through its API.
 
 The updated application was deployed on September 9, 2026, from merged PR #1
 with a live-test correction in commit `220223f`. Revision
-`gitlab-research-agent-00012-cos` serves 100% of
+`gitlab-research-agent-00015-cuv` serves 100% of
 production traffic with the archive enabled. For subsequent deployments, preserve
 existing secrets and settings; add or change these values with `--update-env-vars`:
 
@@ -76,8 +76,8 @@ still requires the existing worker to finish. Cloud Run restarts can interrupt i
 ## Production release
 
 - App: https://gitlab-research-agent-oefuclnypq-uc.a.run.app
-- Image digest: `sha256:f26eb803bf7a2c81334b172f894af3a25260c1d83748aae5467ff815ffcb7e97`.
-- Cloud Build: `a3356dd2-5848-4e14-ab2b-ead90b9f405b`.
+- Image digest: `sha256:5e1e99299b0ca4a53781e4993a672630f92fdb80652e14b7ce85f6ca52f7b129`.
+- Cloud Build: `8b7b7771-570f-4c97-a82d-6f9d3fdb39ae`.
 - Existing public invocation permissions were retained. Organization sign-in
   protection remains required before confidential research is stored.
 - Gemini is configured. OpenAI and Claude need their optional API keys.
@@ -107,3 +107,19 @@ have no missing destinations. The final revision recovered the report and PDF
 from Cloud Storage into a fresh cache. The corrected synthetic sample remains
 in the library as Deployment Test; its original uncorrected test copy was removed.
 167 backend tests passed before the corrected deployment.
+
+## Next Ladder release
+
+PR #2 adds PDF/DOCX intake support and content-based format detection with a manual
+selector. The live release includes correction `ea061fb` (protocol 9.1) for
+intake-specific evidence queries. Both synthetic PDF and DOCX intakes were detected
+correctly, and a conventional concept note retained its income-research protocol.
+Funding fields stayed separate. Browser checks covered selection persistence,
+Word upload, prompt review, extracted intake fields and mobile width.
+
+175 backend tests and three frontend tests pass. OpenAlex returned results for
+both intake and concept-note tests; timeouts/source limits were accurately shown
+as partial coverage. Real intake examples were read only on the local machine;
+no private survey contents were committed or sent to the public app. A full paid
+Next Ladder synthesis was not rerun; the prior live provider/export/storage test
+and new extraction/protocol/routing tests cover this release.
