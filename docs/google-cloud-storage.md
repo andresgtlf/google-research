@@ -25,7 +25,8 @@ before confidential research is accessible through its API.
 ## Activate with the updated application
 
 The updated application was deployed on September 9, 2026, from merged PR #1
-(commit `d81aef2`). Revision `gitlab-research-agent-00010-rex` serves 100% of
+with a live-test correction in commit `220223f`. Revision
+`gitlab-research-agent-00012-cos` serves 100% of
 production traffic with the archive enabled. For subsequent deployments, preserve
 existing secrets and settings; add or change these values with `--update-env-vars`:
 
@@ -75,8 +76,8 @@ still requires the existing worker to finish. Cloud Run restarts can interrupt i
 ## Production release
 
 - App: https://gitlab-research-agent-oefuclnypq-uc.a.run.app
-- Image digest: `sha256:424dc1b77c314866799b0eaa17a9837b4f857c06d4c88dc020555b61b597b68f`.
-- Cloud Build: `6d393de7-7e17-46f9-b1f8-6a54671a118e`.
+- Image digest: `sha256:f26eb803bf7a2c81334b172f894af3a25260c1d83748aae5467ff815ffcb7e97`.
+- Cloud Build: `a3356dd2-5848-4e14-ab2b-ead90b9f405b`.
 - Existing public invocation permissions were retained. Organization sign-in
   protection remains required before confidential research is stored.
 - Gemini is configured. OpenAI and Claude need their optional API keys.
@@ -91,3 +92,18 @@ its test objects afterward (soft-deleted copies expire after seven days).
 
 References: [Cloud Storage uploads](https://docs.cloud.google.com/storage/docs/uploading-objects)
 and [uniform bucket-level access](https://docs.cloud.google.com/storage/docs/uniform-bucket-level-access).
+
+Production verification also completed a real Gemini 3.8 Flash extraction, ten
+OpenAlex queries (211 matches before deduplication), and a narrowly scoped Gemini
+Deep Research Max run. The run completed in about eight minutes. A repeated
+request reused the saved result. The live run revealed omitted APA references
+and a DOI parsing issue; protocol 8.2 now recovers omitted reference lists through
+Crossref's APA formatter for DOI links already in the report. Failed metadata
+lookups leave the original report intact. This does not verify research claims.
+
+The test report was reformatted without another model call. Its cloud-saved PDF
+has five resolved internal links and sixteen external links; browser citations
+have no missing destinations. The final revision recovered the report and PDF
+from Cloud Storage into a fresh cache. The corrected synthetic sample remains
+in the library as Deployment Test; its original uncorrected test copy was removed.
+167 backend tests passed before the corrected deployment.

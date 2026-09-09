@@ -176,3 +176,8 @@ Selection reviewed September 2026 against Google's [model specification](https:/
 and [Deep Research guide](https://ai.google.dev/gemini-api/docs/deep-research).
 These defaults are based on documented capabilities; comparative quality has
 not yet been benchmarked on private concept notes.
+
+When a model omits its reference list, protocol 8.2 attempts bounded Crossref APA
+formatting for DOIs already in the report and adds reference navigation. It
+preserves the model's original text in JSON and labels the recovered metadata.
+Unresolved and non-DOI sources may still need manual formatting.
