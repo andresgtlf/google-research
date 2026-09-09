@@ -17,6 +17,8 @@ protocol, then read and download the evidence report.
 - Saves research and evidence snapshots in a searchable library. Identical inputs
   and settings can reuse the original report; **Run a fresh search** bypasses reuse.
 - Exports Markdown, PDF and JSON with report provenance and access checks.
+- Requests APA 7 author–date references, links citations to their reference entries,
+  and adds return links. PDF references use hanging indents and clickable source URLs.
 
 A fixed prompt cannot make fresh AI research deterministic. Reopening a saved
 run preserves its exact evidence and text. Fresh runs require quality evaluation;

@@ -1,6 +1,6 @@
 # Research quality and reuse
 
-Protocol 8.0 separates repeatable inputs from stochastic research. A prompt
+Protocol 8.1 separates repeatable inputs from stochastic research. A prompt
 cannot guarantee that Gemini, OpenAI or Claude will retrieve the same studies
 on every fresh run. They can change search paths, model versions and synthesis.
 
@@ -65,3 +65,16 @@ Jaccard overlap of included studies, missed long-run papers, null-effect coverag
 unsupported effect-size claims and access-link correctness. Do not use an LLM's
 own report as the gold standard. Review failures before changing retrieval
 weights or deploying the new protocol.
+
+## APA citations and navigation
+
+Protocol 8.1 requests APA 7 author-date citations and an alphabetical reference
+list with verified DOI or publisher hyperlinks. The application adds stable
+citation destinations and per-occurrence return links; the PDF uses hanging
+indents and a references shortcut. Internal links in the app stay in the report.
+
+The navigation pass does not invent missing bibliographic metadata or guarantee
+that a model formatted every field correctly. It recognizes older APA-style
+reference lists where possible, flags ambiguous or missing references, and
+retains unrecognized material. The research JSON preserves the original model
+text as `original_result`. Existing saved artifacts are not rewritten in place.

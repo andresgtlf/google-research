@@ -1,4 +1,5 @@
 import { useEffect, useRef, type ReactNode } from "react";
+import Markdown from "./Markdown";
 import { Badge } from "./Badge";
 
 const LINK_KEYS = ["link", "url"];
@@ -102,7 +103,9 @@ export default function ResultsEvidenceTable({ rows }: { rows: Record<string, st
               {columns.map((key, colIndex) => {
                 const value = row[key] ?? "";
                 const lowerKey = key.toLowerCase();
-                let content: ReactNode = value;
+                let content: ReactNode = value.includes("](#ref-")
+                  ? <div className="evidence-citation"><Markdown headingIds={false}>{value}</Markdown></div>
+                  : value;
                 if (LINK_KEYS.some((lk) => lowerKey.includes(lk)) && /https?:\/\//.test(value)) {
                   content = renderLinkCell(value);
                 } else if (ACCESS_KEYS.some((ak) => lowerKey.includes(ak)) && value) {

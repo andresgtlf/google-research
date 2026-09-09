@@ -12,9 +12,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import Callable, Optional
 
-import markdown
 
 from .evidence.attribution import ATTRIBUTION_MARKDOWN
+from .citations import prepare_citations
+from .report_html import report_html
 
 log = logging.getLogger(__name__)
 
@@ -145,6 +146,8 @@ def create_markdown_report(
     research_text = data.get("result", "") or data.get("research_result", {}).get(
         "result", ""
     )
+    citation_document = prepare_citations(research_text)
+    research_text = citation_document.markdown
     provider = data.get("provider", "")
     model = data.get("model", "")
 
@@ -152,10 +155,13 @@ def create_markdown_report(
     title = extraction.get("project_title", "Research Report")
 
     lines = [
+        '<a id="report-start"></a>\n',
         f"# {org}\n",
         f"## {title}\n",
         f"\n*Generated on {data.get('created_at') or datetime.now().strftime('%B %d, %Y')}*\n",
     ]
+    if '## References' in research_text:
+        lines.append("[Jump to references](#references) · Select an author–date citation to see its reference; use its return links to come back.\n")
     if provider:
         engine = PROVIDER_LABELS.get(provider, provider)
         lines.append(f"\n*Research engine: {engine}" + (f" — `{model}`*\n" if model else "*\n"))
@@ -169,6 +175,7 @@ def create_markdown_report(
         "\n\n## Access and citation checks\n" if data.get("enrichment") else "",
         data.get("enrichment", {}).get("resolutions_markdown", ""),
         data.get("enrichment", {}).get("verification_markdown", ""),
+        "\n\n## Citation notes\n" + "\n".join(citation_document.warnings) if citation_document.warnings else "",
         "\n\n## Run provenance\n",
         f"Protocol: {data.get('protocol_version', 'legacy')}\n",
         f"Run fingerprint: `{data.get('run_fingerprint', 'not recorded')}`\n",
@@ -193,6 +200,9 @@ thead { display: table-header-group; }
 tr { break-inside: avoid; }
 h2 + ul { break-inside: avoid; }
 p { orphans: 3; widows: 3; }
+.apa-reference { padding-left: 1.27cm; text-indent: -1.27cm; line-height: 2; break-inside: avoid; overflow-wrap: anywhere; }
+.citation-backlinks { font-size: 8pt; margin-top: -4px; }
+#references { break-before: page; }
 body {
     font-family: 'Helvetica Neue', Arial, sans-serif;
     line-height: 1.55; color: #1C1917; font-size: 10.5pt;
@@ -235,9 +245,7 @@ def create_pdf_report(
         markdown_path = create_markdown_report(research_json_path, output_dir)
 
     md_content = markdown_path.read_text(encoding="utf-8")
-    html_content = markdown.markdown(
-        md_content, extensions=["tables", "fenced_code", "nl2br"]
-    )
+    html_content = report_html(md_content)
 
     full_html = (
         "<!DOCTYPE html><html><head><meta charset='UTF-8'>"

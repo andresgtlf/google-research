@@ -363,3 +363,16 @@ body {
   opacity: var(--scroll-fade-opacity, 0);
   transition: opacity 150ms ease-out;
 }
+
+/* APA bibliography and keyboard-accessible in-document destinations. */
+.report-md .apa-reference {
+  padding-left: 2rem;
+  text-indent: -2rem;
+  line-height: 2;
+  overflow-wrap: anywhere;
+}
+.citation-anchor, .report-md h2 { scroll-margin-top: 6rem; }
+.citation-anchor:focus { outline: 2px solid var(--color-accent); }
+.report-md a[href^="#ref-"], .report-md a[href^="#cite-ref-"] { text-decoration: underline; }
+
+.evidence-citation .report-md p { margin: 0; }

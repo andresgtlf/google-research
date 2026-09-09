@@ -31,6 +31,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from .export import export_research_report
+from .citations import prepare_citations
 from .extraction import extract_from_pdf, EXTRACTION_MODEL
 from .prompts import EXTRACTION_PROMPT
 from .library import library, fingerprint, PROTOCOL_VERSION
@@ -536,6 +537,17 @@ class JobManager:
                     }
                 )
 
+                research_data["original_result"] = report_md
+                citation_document = prepare_citations(report_md)
+                report_md = citation_document.markdown
+                research_data["result"] = report_md
+                research_data["citation_navigation"] = {
+                    "references": citation_document.reference_count,
+                    "linked_citations": citation_document.citation_count,
+                    "warnings": list(citation_document.warnings),
+                }
+                for warning in citation_document.warnings:
+                    job.add_event(warning)
                 job.add_event("Parsing report sections")
                 try:
                     sections = parse_report_sections(report_md)
@@ -554,6 +566,7 @@ class JobManager:
                             "The full report is shown below."
                         ],
                     }
+                sections.setdefault("parse_warnings", []).extend(citation_document.warnings)
                 for warning in sections.get("parse_warnings") or []:
                     job.add_event(warning)
 

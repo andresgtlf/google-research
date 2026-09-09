@@ -56,7 +56,19 @@ export default function Results({ job }: ResultsProps) {
     paywalledSummary.shouldRender && paywalledSummary.usesEnrichment;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" onClick={(event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const href = target.closest("a")?.getAttribute("href");
+      if (!href || !/^#(?:ref-|cite-ref-|references$)/.test(href)) return;
+      event.preventDefault();
+      setShowFull(true);
+      requestAnimationFrame(() => {
+        const destination = document.getElementById(href.slice(1));
+        destination?.scrollIntoView({ behavior: "smooth", block: "start" });
+        destination?.focus({ preventScroll: true });
+      });
+    }}>
       {/* Top summary bar: identity, status, downloads. Moved to the top so
           the two most action-relevant items (download, know what to chase
           manually) never require scrolling past the whole report. */}
@@ -87,6 +99,9 @@ export default function Results({ job }: ResultsProps) {
               Download PDF
             </a>
           )}
+          {headings.some((heading) => heading.id === "references") && (
+            <a href="#references" className={buttonClasses("secondary")}>References</a>
+          )}
           {files.json && (
             <a href={fileUrl(job.id, "json")} className={buttonClasses("secondary")}>
               <DownloadSimpleIcon size={16} /> Download research data
@@ -108,7 +123,7 @@ export default function Results({ job }: ResultsProps) {
       {parseWarnings.length > 0 && (
         <div className="flex items-start gap-2 rounded-lg bg-[var(--color-surface-2)] px-4 py-2.5 text-caption text-[var(--color-text-secondary)]">
           <InfoIcon size={14} className="mt-0.5 shrink-0" />
-          <span>Some report sections could not be parsed automatically.</span>
+          <span>{parseWarnings.join(" ")}</span>
         </div>
       )}
 

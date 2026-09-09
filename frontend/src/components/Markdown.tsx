@@ -1,4 +1,5 @@
-import { useMemo, useRef, type ReactNode } from "react";
+import { type ReactNode } from "react";
+import { citationAnchors } from "../lib/citationAnchors";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { slugify } from "../lib/reportHeadings";
@@ -32,13 +33,7 @@ interface MarkdownProps {
 }
 
 export default function Markdown({ children, headingIds = true }: MarkdownProps) {
-  // Reset the de-dupe counter whenever the underlying markdown changes so
-  // ids stay stable and match extractHeadings for that document.
-  const seenIds = useRef(new Map<string, number>());
-  const idsForThisRender = useMemo(() => {
-    seenIds.current = new Map<string, number>();
-    return seenIds.current;
-  }, [children]);
+  const idsForThisRender = new Map<string, number>();
 
   function idFor(text: string): string | undefined {
     if (!headingIds) return undefined;
@@ -51,7 +46,7 @@ export default function Markdown({ children, headingIds = true }: MarkdownProps)
   return (
     <div className="report-md">
       <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
+        remarkPlugins={[remarkGfm, [citationAnchors, { emitIds: headingIds }]]}
         components={{
           h1: ({ children: kids, ...props }) => (
             <h1 id={idFor(nodeText(kids))} {...props}>
@@ -69,7 +64,7 @@ export default function Markdown({ children, headingIds = true }: MarkdownProps)
             </div>
           ),
           a: ({ children: kids, href, ...props }) => (
-            <a href={href} target="_blank" rel="noreferrer" {...props}>
+            <a href={href} target={href?.startsWith("#") ? undefined : "_blank"} rel={href?.startsWith("#") ? undefined : "noreferrer"} {...props}>
               {kids}
             </a>
           ),
