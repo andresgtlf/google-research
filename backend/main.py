@@ -11,7 +11,7 @@ from typing import Any, Optional
 from dotenv import load_dotenv
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile, Form, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -30,6 +30,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.exception_handler(OSError)
+async def storage_unavailable(request: Request, exc: OSError):
+    return JSONResponse(status_code=503, content={
+        "detail": "Research storage is unavailable. Please try again after storage access is restored."
+    })
+
 
 MAX_UPLOAD_BYTES = 50 * 1024 * 1024
 

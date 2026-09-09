@@ -135,11 +135,15 @@ single-process job manager: deploy **one worker and one instance**. On Cloud Run
 background work needs `--no-cpu-throttling`, `--min-instances 1` and
 `--max-instances 1`. Use sufficient memory for job artifacts and provider runs.
 
-**Mount persistent storage at `LIBRARY_DIR` and back it up.** Cloud Run container
-storage is ephemeral. Minimum instances and local JSON persistence do not protect
-against redeployment or instance loss. A shared database and durable queue are
-required before horizontal scaling. Use a filesystem with atomic rename support
-for the archive; do not assume every object-storage mount provides it.
+**Configure `LIBRARY_GCS_BUCKET` for Google Cloud Storage**, or mount persistent
+storage at `LIBRARY_DIR`. With a bucket configured, completed reports and reusable
+extractions live in Cloud Storage; `LIBRARY_DIR` is only a download cache and can
+be ephemeral. The app uses the Cloud Storage API directly, without a filesystem
+mount. See [Google Cloud storage setup](docs/google-cloud-storage.md).
+
+Minimum instances and local JSON persistence do not protect running jobs against
+instance loss. A durable queue is still required for job recovery and horizontal
+scaling. Cloud Storage protects completed research, not in-flight model calls.
 
 The library is shared by users of an installation. Put the service behind your
 organization's authentication before storing private concept-note research. An

@@ -298,15 +298,24 @@ class JobManager:
                 log.exception("Skipping unreadable job file %s", job_json)
                 continue
             self._jobs[job.id] = job
-            if job.kind == "research" and job.status == "completed" and not library.get(job.id):
+            if job.kind == "research" and job.status == "completed":
                 try:
-                    library.save(job.to_dict(), job.dir)
+                    if not library.get(job.id):
+                        library.save(job.to_dict(), job.dir)
                 except OSError:
                     log.exception("Could not archive existing research %s", job.id)
             restored += 1
         if restored:
             log.info("Restored %d job(s) from %s", restored, JOBS_DIR)
         self.reap_expired()
+
+    @staticmethod
+    def _archived(job_id):
+        try:
+            return library.get(job_id) is not None
+        except OSError:
+            log.warning("Archive unavailable; retaining job %s", job_id)
+            return False
 
     def reap_expired(self):
         """Delete job directories and in-memory state past the TTL."""
@@ -319,7 +328,7 @@ class JobManager:
                 if job.status not in ACTIVE_STATUSES
                 and _age_hours(job.updated_at) > JOB_TTL_HOURS
                 and (job.kind != "research" or not job.result.get("report_markdown")
-                     or library.get(job.id) is not None)
+                     or self._archived(job.id))
             ]
             for job_id in expired:
                 self._jobs.pop(job_id, None)
@@ -613,7 +622,7 @@ class JobManager:
                 job.set_status("completed")
                 try:
                     library.save(job.to_dict(), job.dir)
-                    job.add_event("Saved to research library")
+                    job.add_event("Saved to Google Cloud research library" if hasattr(library, "bucket_name") else "Saved to research library")
                 except OSError:
                     job.add_event("Library save failed; download the report before job expiry")
             except Exception as exc:

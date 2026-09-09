@@ -51,9 +51,13 @@ class ResearchLibrary:
         return self._read(self.root / "runs" / run_id / "job.json")
 
     def list(self, query: str = "", limit: int = 50, offset: int = 0) -> list[dict]:
+        jobs = (self._read(path) for path in (self.root / "runs").glob("*/job.json"))
+        return self._summaries(jobs, query, limit, offset)
+
+    @staticmethod
+    def _summaries(jobs, query, limit, offset):
         rows = []
-        for path in (self.root / "runs").glob("*/job.json"):
-            job = self._read(path)
+        for job in jobs:
             if not job:
                 continue
             extraction = job.get("result", {}).get("extraction", {})
@@ -115,4 +119,12 @@ class ResearchLibrary:
         temporary.replace(path)
 
 
-library = ResearchLibrary()
+def configured_library():
+    bucket = os.environ.get("LIBRARY_GCS_BUCKET", "").strip()
+    if bucket:
+        from .cloud_library import CloudResearchLibrary
+        return CloudResearchLibrary(bucket)
+    return ResearchLibrary()
+
+
+library = configured_library()
