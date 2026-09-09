@@ -35,6 +35,7 @@ from .extraction import extract_from_pdf, EXTRACTION_MODEL
 from .prompts import EXTRACTION_PROMPT
 from .library import library, fingerprint, PROTOCOL_VERSION
 from .providers import get_provider
+from .evidence.status import openalex_status
 from .evidence.pipeline import (
     enrich_report,
     enrichment_enabled,
@@ -90,6 +91,7 @@ class Job:
         self.model: Optional[str] = None
         self.remote_id: Optional[str] = None
         self.result: dict[str, Any] = {}
+        self.evidence_status: dict[str, Any] = {}
         self.dir = JOBS_DIR / self.id
         self.dir.mkdir(parents=True, exist_ok=True)
         self._lock = threading.Lock()
@@ -111,6 +113,7 @@ class Job:
         job.model = data.get("model")
         job.remote_id = data.get("remote_id")
         job.result = data.get("result") or {}
+        job.evidence_status = data.get("evidence_status") or {}
         job.dir = JOBS_DIR / job.id
         job._lock = threading.Lock()
 
@@ -143,6 +146,12 @@ class Job:
             self.updated_at = _now()
             self._save_locked()
 
+    def set_evidence_status(self, status: dict[str, Any]):
+        with self._lock:
+            self.evidence_status = status
+            self.updated_at = _now()
+            self._save_locked()
+
     def set_result(self, result: dict[str, Any]):
         with self._lock:
             self.result = result
@@ -164,6 +173,7 @@ class Job:
             "model": self.model,
             "remote_id": self.remote_id,
             "result": self.result,
+            "evidence_status": self.evidence_status,
         }
 
     def _save_locked(self):
@@ -354,6 +364,9 @@ class JobManager:
     def start_extract(self, pdf_bytes: bytes, filename: str, refresh: bool = False) -> Job:
         self.reap_expired()
         job = Job("extract")
+        job.set_evidence_status({"state": "waiting" if seeding_enabled() else "disabled",
+                                 "message": "OpenAlex will search for papers after the concept note is read."
+                                 if seeding_enabled() else "OpenAlex candidate search is disabled for this run."})
         self._register(job)
         (job.dir / "input.pdf").write_bytes(pdf_bytes)
 
@@ -368,6 +381,8 @@ class JobManager:
                 cached = None if refresh else library.cached_extraction(cache_key)
                 if cached:
                     cached["source_filename"] = filename
+                    if seeding_enabled():
+                        job.set_evidence_status(openalex_status(cached.get("evidence_snapshot"), reused=True))
                     job.set_result(cached)
                     job.add_event("Reused saved extraction and evidence snapshot; select fresh search to update")
                     job.set_status("completed")
@@ -378,14 +393,17 @@ class JobManager:
                     + (f" ({extraction.country})" if extraction.country else "")
                 )
 
-                # Optional, off by default, and never load-bearing: seeding only
+                # Optional and never load-bearing: seeding only
                 # accelerates the agent's own search. seed_candidates() returns
                 # None when disabled or unusable, which makes the prompt builder
                 # emit the unmodified protocol.
                 retrieval = None
                 if seeding_enabled():
-                    job.add_event("Retrieving pre-screened candidate studies")
+                    job.set_evidence_status({"state": "searching", "message": "Connecting to OpenAlex and searching for relevant papers. Other evidence sources run alongside it."})
+                    job.add_event("Searching OpenAlex and Economics Literature Search for candidate studies")
                     retrieval = seed_candidates(extraction)
+                    job.set_evidence_status(openalex_status(asdict(retrieval) if retrieval else None))
+                    job.add_event("OpenAlex: " + job.evidence_status["message"])
                     if retrieval is not None and retrieval.usable:
                         job.add_event(
                             f"{len(retrieval.candidates)} candidate studies "
@@ -440,6 +458,7 @@ class JobManager:
         source_filename: str = "",
         reuse_existing: bool = True,
         evidence_snapshot: Optional[dict] = None,
+        evidence_status: Optional[dict] = None,
     ) -> Job:
         provider = get_provider(provider_id)
         if not provider.available():
@@ -463,6 +482,7 @@ class JobManager:
         job = Job("research")
         job.provider = provider_id
         job.model = resolved_model
+        job.set_evidence_status(evidence_status or openalex_status(evidence_snapshot))
         self._register(job)
 
         def work():
@@ -497,6 +517,7 @@ class JobManager:
                     "protocol_version": PROTOCOL_VERSION,
                     "run_fingerprint": run_key,
                     "evidence_snapshot": evidence_snapshot,
+                    "evidence_status": job.evidence_status,
                     "result": report_md,
                 }
                 research_json_path = job.dir / "research.json"
@@ -541,8 +562,13 @@ class JobManager:
                 # 75-minute run can never be lost to it. On failure the report
                 # displays exactly as the agent wrote it.
                 if enrichment_enabled():
-                    job.add_event("Checking paywalled papers and cited DOIs")
-                    enrichment = enrich_report(report_md)
+                    job.add_event("Checking paywalled papers and cited DOIs with OpenAlex and Economics Literature Search")
+                    source_status = dict(job.evidence_status)
+                    job.set_evidence_status({**source_status, "activity": "Checking access links and cited DOIs with OpenAlex"})
+                    try:
+                        enrichment = enrich_report(report_md)
+                    finally:
+                        job.set_evidence_status(source_status)
                     sections["enrichment"] = enrichment
                     for event in summarize_enrichment(enrichment):
                         job.add_event(event)

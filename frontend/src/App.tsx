@@ -5,6 +5,7 @@ import Stepper, { STEP_LABELS } from "./components/Stepper";
 import ConfigureStep from "./components/ConfigureStep";
 import PromptReview from "./components/PromptReview";
 import ProgressView from "./components/ProgressView";
+import EvidenceSourceStatus from "./components/EvidenceSourceStatus";
 import ResearchLibrary from "./components/ResearchLibrary";
 import Results from "./components/Results";
 import ResearchErrorCard from "./components/ResearchErrorCard";
@@ -128,6 +129,8 @@ export default function App() {
               )}
 
               {session.phase === "review" && (
+                <div className="space-y-6">
+                <EvidenceSourceStatus status={session.extractJob?.evidence_status} terminal />
                 <PromptReview
                   extraction={session.extractJob?.result?.extraction}
                   prompt={session.researchPrompt}
@@ -138,6 +141,7 @@ export default function App() {
                   }
                   onReset={session.handleFullReset}
                 />
+                </div>
               )}
 
               {session.phase === "error" && (

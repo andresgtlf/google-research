@@ -103,6 +103,7 @@ def research(req: ResearchRequest) -> dict[str, str]:
             source_filename=extract_job.result.get("source_filename", ""),
             reuse_existing=req.reuse_existing,
             evidence_snapshot=extract_job.result.get("evidence_snapshot"),
+            evidence_status=extract_job.evidence_status,
         )
     except ValueError as exc:
         raise HTTPException(400, str(exc))

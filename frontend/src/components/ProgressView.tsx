@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { Job } from "../types";
+import EvidenceSourceStatus from "./EvidenceSourceStatus";
 import { useElapsed } from "../lib/useElapsed";
 
 const LONG_TAIL_THRESHOLD_SECONDS = 25 * 60;
@@ -23,21 +24,23 @@ export default function ProgressView({ phase, job, providerLabel }: ProgressView
   const logEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    logEndRef.current?.scrollIntoView({ block: "end" });
+    const log = logEndRef.current?.parentElement;
+    if (log) log.scrollTop = log.scrollHeight;
   }, [events.length]);
 
   const heading =
     phase === "extracting"
-      ? "Extracting the concept note"
+      ? job?.evidence_status?.state === "searching" ? "Finding relevant papers" : "Preparing the evidence review"
       : `Running research with ${providerLabel}`;
 
   const introCopy =
     phase === "extracting"
-      ? "Reading the PDF and pulling structured fields. This usually takes under a minute."
+      ? "Reading the PDF, then searching scholarly sources for relevant papers. The source search may take a few minutes."
       : "Research in progress. This typically takes 5 to 20 minutes depending on the provider and prompt length. You can leave this tab open.";
 
   return (
     <div className="space-y-6">
+      <EvidenceSourceStatus status={job?.evidence_status} />
       <div className="rounded-lg bg-[var(--color-surface-1)] border border-[var(--color-border-subtle)] p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">

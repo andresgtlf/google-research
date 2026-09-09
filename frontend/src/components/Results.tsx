@@ -3,6 +3,7 @@ import { fileUrl } from "../api";
 import type { Job } from "../types";
 import { buttonClasses } from "./Button";
 import { CaretDownIcon, DownloadSimpleIcon, InfoIcon } from "./Icon";
+import EvidenceSourceStatus from "./EvidenceSourceStatus";
 import Markdown from "./Markdown";
 import ResultsEvidenceTable from "./ResultsEvidenceTable";
 import {
@@ -101,6 +102,8 @@ export default function Results({ job }: ResultsProps) {
           )}
         </div>
       </div>
+
+      <EvidenceSourceStatus status={job.evidence_status} terminal />
 
       {parseWarnings.length > 0 && (
         <div className="flex items-start gap-2 rounded-lg bg-[var(--color-surface-2)] px-4 py-2.5 text-caption text-[var(--color-text-secondary)]">

@@ -66,7 +66,19 @@ export type JobStatus =
    * job must be re-run, it never resumes on its own. */
   | "interrupted";
 
+export interface EvidenceStatus {
+  activity?: string;
+  state: "waiting" | "searching" | "complete" | "partial" | "unavailable" | "disabled";
+  message: string;
+  reused?: boolean;
+  queries_completed?: number;
+  queries_failed?: number;
+  matches?: number;
+  retrieved_at?: string;
+}
+
 export interface Job {
+  evidence_status?: EvidenceStatus;
   id: string;
   kind: "extract" | "research";
   status: JobStatus;
