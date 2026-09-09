@@ -16,6 +16,7 @@ from typing import Callable, Optional
 from .evidence.attribution import ATTRIBUTION_MARKDOWN
 from .citations import prepare_citations
 from .report_html import report_html
+from .report_filename import report_filename
 
 log = logging.getLogger(__name__)
 
@@ -196,7 +197,7 @@ def create_markdown_report(
 
     output_dir = Path(output_dir or research_json_path.parent)
     output_dir.mkdir(parents=True, exist_ok=True)
-    output_path = output_dir / f"{research_json_path.stem}.md"
+    output_path = output_dir / report_filename(extraction.get("organization"), "md")
     output_path.write_text("\n".join(lines), encoding="utf-8")
     return output_path
 
@@ -262,7 +263,10 @@ def create_pdf_report(
 
     output_dir = Path(output_dir or research_json_path.parent)
     output_dir.mkdir(parents=True, exist_ok=True)
-    output_path = output_dir / f"{research_json_path.stem}.pdf"
+    data = json.loads(research_json_path.read_text(encoding="utf-8"))
+    output_path = output_dir / report_filename(
+        (data.get("extraction") or {}).get("organization"), "pdf"
+    )
     HTML(string=full_html).write_pdf(output_path)
     return output_path
 

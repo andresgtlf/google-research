@@ -17,6 +17,7 @@ from pydantic import BaseModel
 
 load_dotenv()
 
+from .report_filename import report_filename
 from .documents import FORMATS, validate_document
 from .library import library
 from .jobs import manager  # noqa: E402
@@ -153,8 +154,7 @@ def job_file(job_id: str, kind: str):
     if not name or not (job.dir / name).exists():
         raise HTTPException(404, f"No {kind} file for this job")
     org = (job.result.get("extraction") or {}).get("organization", "report")
-    safe_org = "".join(c if c.isalnum() or c in "-_ " else "" for c in org).strip()
-    download_name = f"{safe_org or 'report'}_research.{kind if kind != 'md' else 'md'}"
+    download_name = report_filename(org, kind)
     return FileResponse(job.dir / name, media_type=media_type, filename=download_name)
 
 
