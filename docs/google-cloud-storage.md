@@ -24,10 +24,10 @@ before confidential research is accessible through its API.
 
 ## Activate with the updated application
 
-The currently deployed v7 image does not contain this adapter. Bucket creation
-and access configuration do not activate storage in that old image. Deploy a
-reviewed image containing this PR, preserving existing secrets and environment
-settings. Add these environment variables using `--update-env-vars`:
+The updated application was deployed on September 9, 2026, from merged PR #1
+(commit `d81aef2`). Revision `gitlab-research-agent-00010-rex` serves 100% of
+production traffic with the archive enabled. For subsequent deployments, preserve
+existing secrets and settings; add or change these values with `--update-env-vars`:
 
 ```text
 LIBRARY_GCS_BUCKET=gtlf-research-library-695396203364
@@ -37,8 +37,9 @@ LIBRARY_DIR=/tmp/research-library-cache
 Do not set `GOOGLE_APPLICATION_CREDENTIALS` on Cloud Run: the client uses the
 attached service identity automatically. For this single-process app retain
 one worker, `--max-instances 1`, `--min-instances 1`, and `--no-cpu-throttling`.
-Changing the Cloud Run image or settings is a separate production rollout; it
-has not been performed as part of provisioning storage.
+The production rollout set those worker options. The previous revision
+`gitlab-research-agent-00008-jp9` is available for rollback, but lacks this archive
+adapter. Rolling back application traffic does not delete bucket contents.
 
 For local use, run `gcloud auth application-default login` using the Foundation
 account, then add the bucket setting to `.env` and restart the app. The existing
@@ -70,6 +71,15 @@ This is a completed-research archive, not a durable job queue or an indexed
 research database. Listing currently scans run metadata, suitable for a small
 team library; larger collections should add a database index. In-flight work
 still requires the existing worker to finish. Cloud Run restarts can interrupt it.
+
+## Production release
+
+- App: https://gitlab-research-agent-oefuclnypq-uc.a.run.app
+- Image digest: `sha256:424dc1b77c314866799b0eaa17a9837b4f857c06d4c88dc020555b61b597b68f`.
+- Cloud Build: `6d393de7-7e17-46f9-b1f8-6a54671a118e`.
+- Existing public invocation permissions were retained. Organization sign-in
+  protection remains required before confidential research is stored.
+- Gemini is configured. OpenAI and Claude need their optional API keys.
 
 ## Verification
 
