@@ -42,7 +42,7 @@ class ResearchRequest(BaseModel):
     research_prompt: Optional[str] = None  # edited prompt (customized mode)
     provider: str = "gemini"
     model: Optional[str] = None
-    tier: str = "fast"  # fast | max | legacy
+    tier: Optional[str] = None  # omitted: provider recommendation; fast | max | legacy
     formats: list[str] = ["markdown", "pdf"]
     reuse_existing: bool = True
 

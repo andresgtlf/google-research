@@ -114,6 +114,7 @@ def _summarize_progress(interaction: Any) -> str:
 
 
 class GeminiProvider(ResearchProvider):
+    recommended_tier = "max"
     id = "gemini"
     label = "Gemini Deep Research"
     description = "Google's autonomous Deep Research agent (Interactions API)."
@@ -125,19 +126,19 @@ class GeminiProvider(ResearchProvider):
                 id="deep-research-preview-04-2026",
                 label="Deep Research (Fast)",
                 tier="fast",
-                note="Speed and efficiency. Recommended default.",
+                note="Faster, lighter research. Choose Max for a comprehensive literature review.",
             ),
             ModelOption(
                 id="deep-research-max-preview-04-2026",
-                label="Deep Research Max",
+                label="Deep Research Max (recommended)",
                 tier="max",
-                note="Maximum comprehensiveness. Typically 20 to 60 minutes.",
+                note="Recommended for literature reviews: deeper context gathering and synthesis. Allow up to 60 minutes; costs more than Fast.",
             ),
             ModelOption(
                 id="deep-research-pro-preview-12-2025",
                 label="Deep Research Pro (Dec 2025, legacy)",
                 tier="legacy",
-                note="Previous-generation agent used by v2.",
+                note="Legacy compatibility only. Prefer Max or Fast for new reviews.",
             ),
         ]
 

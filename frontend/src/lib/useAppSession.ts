@@ -46,7 +46,7 @@ export function useAppSession() {
   const [freshSearch, setFreshSearch] = useState(false);
   const [mode, setMode] = useState<ResearchMode>("standard");
   const [providerId, setProviderId] = useState("gemini");
-  const [tier, setTier] = useState("fast");
+  const [tier, setTier] = useState("max");
 
   const [providers, setProviders] = useState<ProviderInfo[]>([]);
   const [providersError, setProvidersError] = useState<string | null>(null);
@@ -125,7 +125,7 @@ export function useAppSession() {
       }
       setMode(persisted.mode ?? "standard");
       setProviderId(persisted.providerId ?? "gemini");
-      setTier(persisted.tier ?? "fast");
+      setTier(persisted.tier ?? (persisted.providerId === "gemini" || !persisted.providerId ? "max" : "fast"));
 
       try {
         if (persisted.researchJobId) {

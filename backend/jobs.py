@@ -454,7 +454,7 @@ class JobManager:
         research_prompt: str,
         provider_id: str,
         model_id: Optional[str],
-        tier: str,
+        tier: Optional[str],
         formats: list[str],
         source_filename: str = "",
         reuse_existing: bool = True,

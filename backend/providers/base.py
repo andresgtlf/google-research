@@ -32,9 +32,11 @@ class ProviderInfo:
     env_key: str
     available: bool
     models: list[ModelOption] = field(default_factory=list)
+    recommended_tier: str = "fast"
 
 
 class ResearchProvider(ABC):
+    recommended_tier = "fast"
     id: str
     label: str
     description: str
@@ -58,9 +60,11 @@ class ResearchProvider(ABC):
             env_key=self.env_key,
             available=self.available(),
             models=self.models(),
+            recommended_tier=self.recommended_tier,
         )
 
-    def default_model(self, tier: str = "fast") -> str:
+    def default_model(self, tier: Optional[str] = None) -> str:
+        tier = tier or self.recommended_tier
         for m in self.models():
             if m.tier == tier:
                 return m.id

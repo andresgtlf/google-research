@@ -11,7 +11,7 @@ from .schemas import Extraction
 
 load_dotenv()
 
-EXTRACTION_MODEL = os.environ.get("EXTRACTION_MODEL", "gemini-3-flash-preview")
+EXTRACTION_MODEL = os.environ.get("EXTRACTION_MODEL", "gemini-3.8-flash")
 
 # Extraction is a bounded structured-output task, so cap both the request and
 # the response. Without a timeout a stalled call blocks the worker thread and

@@ -12,6 +12,7 @@ export interface ProviderInfo {
   env_key: string;
   available: boolean;
   models: ModelOption[];
+  recommended_tier: string;
 }
 
 export interface JobEvent {

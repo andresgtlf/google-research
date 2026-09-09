@@ -54,7 +54,7 @@ export default function ProviderPicker({
                 name="provider"
                 value={p.id}
                 checked={isSelected}
-                onChange={() => onSelect(p.id)}
+                onChange={() => { onSelect(p.id); onTier(p.recommended_tier ?? "fast"); }}
                 className="sr-only"
               />
               {isSelected && (
@@ -95,7 +95,7 @@ export default function ProviderPicker({
               const model = current.models.find((m) => m.tier === t);
               return (
                 <option key={t} value={t}>
-                  {TIER_LABELS[t] ?? t}
+                  {model?.label ?? TIER_LABELS[t] ?? t}
                   {model ? ` (${model.id})` : ""}
                 </option>
               );
