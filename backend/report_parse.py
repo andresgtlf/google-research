@@ -222,7 +222,7 @@ def parse_report_sections(md_text: str) -> dict[str, Any]:
 # `backend/evidence/resolve_k.py`), so every field extraction here prefers
 # leaving a field empty over guessing.
 
-_DOI_RE = re.compile(r"10\.\d{4,9}/[^\s\"'<>]+")
+_DOI_RE = re.compile(r"10\.\d{4,9}/[^\s\"'<>\[\]]+")
 _DOI_TRAILING_PUNCT_RE = re.compile(r"[)\]\.,;:!?]+$")
 
 _NO_PAPERS_RE = re.compile(

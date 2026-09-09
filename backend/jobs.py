@@ -31,6 +31,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from .export import export_research_report
+from .reference_recovery import recover_references
 from .citations import prepare_citations
 from .extraction import extract_from_pdf, EXTRACTION_MODEL
 from .prompts import EXTRACTION_PROMPT
@@ -547,6 +548,10 @@ class JobManager:
                 )
 
                 research_data["original_result"] = report_md
+                report_md, recovered = recover_references(report_md)
+                research_data["recovered_references"] = recovered
+                if recovered:
+                    job.add_event(f"Recovered {len(recovered)} APA references from Crossref DOI metadata")
                 citation_document = prepare_citations(report_md)
                 report_md = citation_document.markdown
                 research_data["result"] = report_md
