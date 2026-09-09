@@ -12,7 +12,7 @@ def openalex_status(snapshot: dict | None, *, reused: bool = False) -> dict[str,
     matches = sum(q.get("returned", 0) for q in records if not q.get("error"))
     state = "partial" if completed and (failed or truncated) else "complete" if completed else "unavailable"
     message = (
-        f"{completed} searches completed · {matches} matches before deduplication."
+        f"{completed} {'search' if completed == 1 else 'searches'} completed · {matches} matches before deduplication."
         if completed else "OpenAlex search did not complete. The research engine can continue its own search."
     )
     if failed or truncated:
